@@ -5,6 +5,8 @@ from hexdump import hexdump
 import socket, time, struct
 from datetime import datetime
 
+#lib convert address to cashAddr
+from cashaddress import convert
 #homebrew class
 from address import address as Address
 #constant
@@ -32,7 +34,6 @@ def ripemd160(x):
 	return d
 
 def privateKeyToPublicKey(s):
-	
 	
 	key = binascii.unhexlify(s) #hex as bytes
 	
@@ -64,21 +65,6 @@ def seededprivate_generatepublic(seed):
 def make_message(command, payload):
 	return struct.pack('<L12sL4s', MAGIC, command, len(payload), checksum(payload)) + payload
 
-def getVersionMsg():
-  version = 180002
-  services = 1
-  timestamp = int(time.time())
-  addr_me = b"\x00"*26
-  addr_you = b"\x00"*26
-  nonce = random.getrandbits(64)
-  sub_version_num = b"\x00"
-  start_height = 0
-
-  payload = struct.pack('<LQQ26s26sQsL', version, services, timestamp, addr_me,
-      addr_you, nonce, sub_version_num, start_height)
-  return make_message(b'version', payload)
-
-
 def get_version_message():
 	version = 180002			 	#int32_t 4
 	services = 1 					#uint64_t 8
@@ -93,6 +79,24 @@ def get_version_message():
 	payload = struct.pack('<LQQ26s26sQsL', version, services, timestamp, addr_recv, addr_from,
 		 nonce, user_agent, start_height)	
 	return make_message(b'version', payload)
+
+"""
+construct a transaction that we can broadcasti
+	#https://github.com/zeltsi/Mybitcoin/blob/master/tx%20as%20seen%20on%20youtube.py
+		1. create a raw tx
+		2. raw tx and sign that tx using the private key off addy1 to prove that I approve the transaction
+		3. raw tx and signature in oder to create the real tx 
+"""
+
+def get_raw_tx_message():
+	version  = struct.pack("<L",1) 		#transaction data format version
+	tx_in_count = struct.pack("<B", 1) 	#index of transaction to spendi
+	tx_in = {}							#TEMP
+	tx_out_count = struct.pack
+	#not done, most info from this is here
+	#https://bitcoin.stackexchange.com/questions/3374/how-to-redeem-a-basic-tx
+	#MAKE SURE TO CHANGE THE SIGHASH SCHEME TO BCASH PROTOCOL.
+	#INFO HERE https://bitcoin.stackexchange.com/questions/74875/unable-to-construct-a-correct-raw-transaction-for-bitcoin-cash-testnet
 
 if __name__ == '__main__':
 	#address1, note splat
@@ -117,17 +121,25 @@ if __name__ == '__main__':
 	#select a random node
 	random.seed(datetime.now())
 	node = random.choice(nodes) #singular node
-	gvm = get_version_message()
 	
-	###SENT
-	hexdump(gvm)
-	###
 
+	###################
+	get_raw_tx_message()	
+	
 
+	exit(0)
+	#################
+
+	#get the message to send and dump it
+	message = get_version_message() 
+	hexdump(message)
+	
+	#connect to node
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((node, 8333))
-	sock.send(gvm)
 	
-	###RECV
-	hexdump(sock.recv(2048))
-	###
+	#send message to node
+	sock.send(message)
+	hexdump(sock.recv(1024))
+
+	
