@@ -13,7 +13,6 @@ from address import address as Address
 random.seed(501971)
 MAGIC = 0xe8f3e1e3
 
-
 #helper function(s)
 def str2hex(x):
 	return binascii.hexlify(x).decode()
@@ -58,22 +57,21 @@ def privateKeyToPublicKey(s):
 def seededprivate_generatepublic(seed):
 	random.seed(seed)
 	private_key = ''.join(['%x' % random.randrange(16) for x in range(0, 64)])
-	publ_key, publ_addr, WIF = privateKeyToPublicKey(private_key)
-	return private_key,WIF, publ_key, publ_addr
+	publ_key, publ_addr, WIF = privateKeyToPublicKey(private_key) return private_key,WIF, publ_key, publ_addr
 
 #functions to send data to nodes
 def make_message(command, payload):
 	return struct.pack('<L12sL4s', MAGIC, command, len(payload), checksum(payload)) + payload
 
 def get_version_message():
-	version = 180002			 	#int32_t 4
-	services = 1 					#uint64_t 8
-	timestamp = int(time.time()) 	#int64_t 8
-	addr_recv = b'\x00'*26 			#int64_t 26
-	addr_from = b'\x00'*26 			#int64_t 26
-	nonce = random.getrandbits(64) 	#uint64_t 8
-	user_agent = b'\x00' 			#int64_t ?
-	start_height = 0				#int32_t 4
+	version = 180002		#int32_t 4
+	services = 1			#uint64_t 8
+	timestamp = int(time.time())	#int64_t 8
+	addr_recv = b'\x00'*26		#int64_t 26
+	addr_from = b'\x00'*26		#int64_t 26
+	nonce = random.getrandbits(64)	#uint64_t 8
+	user_agent = b'\x00'		#int64_t ?
+	start_height = 0		#int32_t 4
 
 	#pack payload
 	payload = struct.pack('<LQQ26s26sQsL', version, services, timestamp, addr_recv, addr_from,
@@ -89,14 +87,19 @@ construct a transaction that we can broadcasti
 """
 
 def get_raw_tx_message():
-	version  = struct.pack("<L",1) 		#transaction data format version
-	tx_in_count = struct.pack("<B", 1) 	#index of transaction to spendi
-	tx_in = {}							#TEMP
-	tx_out_count = struct.pack
-	#not done, most info from this is here
-	#https://bitcoin.stackexchange.com/questions/3374/how-to-redeem-a-basic-tx
-	#MAKE SURE TO CHANGE THE SIGHASH SCHEME TO BCASH PROTOCOL.
-	#INFO HERE https://bitcoin.stackexchange.com/questions/74875/unable-to-construct-a-correct-raw-transaction-for-bitcoin-cash-testnet
+	version  = struct.pack("<L",1)		#transaction data format version
+	tx_in_count = struct.pack("<B", 1)	#index of transaction to spend
+
+	#create previous output hash
+	TX_OUT_USE = '2a6086fc4abd493ab068b77c7fa7b4e93fd055ff4b647c18e058af3e477453d3'
+	
+	#reverse BYTE ORDER, then, OG is in hex, thus we ahve to unhexlify and then rehex
+	previous_output_hash = binascii.hexlify(binascii.unhexlify(TX_OUT_USE)[::-1]) #previous output hash
+	
+	#sourceIndex
+	source_index = struct.pack('<L', 0) #
+	
+	
 
 if __name__ == '__main__':
 	#address1, note splat
@@ -113,6 +116,12 @@ if __name__ == '__main__':
 
 	print('GOAL: {} -> {}'.format(address1.address, address2.address))	
 
+	get_raw_tx_message()
+
+	exit(0)
+
+
+
 	#socket/network
 	#get the list of nodes that we can broadcast to
 	nodes = list(socket.gethostbyname_ex('seed.bitcoinabc.org'))
@@ -121,14 +130,6 @@ if __name__ == '__main__':
 	#select a random node
 	random.seed(datetime.now())
 	node = random.choice(nodes) #singular node
-	
-
-	###################
-	get_raw_tx_message()	
-	
-
-	exit(0)
-	#################
 
 	#get the message to send and dump it
 	message = get_version_message() 
@@ -141,5 +142,5 @@ if __name__ == '__main__':
 	#send message to node
 	sock.send(message)
 	hexdump(sock.recv(1024))
-
+	
 	
