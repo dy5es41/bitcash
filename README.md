@@ -13,4 +13,5 @@
 ### other
 by the way this is not completely from base, in geohot's he fetches payloads from  nodes which contain block information. im probably not going to do this 
 ### why?
-there are more sources/documentation for doing this with bitcoin-core, but transaction fees are like ^5x higher than bitcoin-cash. im not using testnet because [we do it live!](https://youtu.be/O_HyZ5aW76c?t=42)
+there are more sources/documentation for doing this with bitcoin-core, but transaction fees are like ^5x higher than bitcoin-cash. im not using testnet because [we do it live!](https://youtu.be/O_HyZ5aW76c?t=42)im going to make the repo public, the private key is PUBLIC, if you steal my 0.1usd i will hunt you down
+
