@@ -11,6 +11,6 @@
 - https://en.bitcoin.it/wiki/Protocol_documentation#Block_Headers
 - https://github.com/vbuterin/pybitcointools
 ### other
-by the way this is not completely from base, in geohot's he gets payloads from  nodes which fetch block information. im probably not going to do this because I value my sanity, instead il use an api or something.
+by the way this is not completely from base, in geohot's he fetches payloads from  nodes which contain block information. im probably not going to do this 
 ### why?
 there are more sources/documentation for doing this with bitcoin-core, but transaction fees are like ^5x higher than bitcoin-cash. im not using testnet because [we do it live!](https://youtu.be/O_HyZ5aW76c?t=42)
